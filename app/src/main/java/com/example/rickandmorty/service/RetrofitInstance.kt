@@ -8,7 +8,7 @@ import retrofit2.create
 object RetrofitInstance {
 
     private var retrofit: Retrofit? = null
-    private const val BASE_URL = "http://rickandmortyapi.com/api/"
+    private const val BASE_URL = "https://rickandmortyapi.com/api/"
 
     /**
      * Create an instance of Retrofit object

@@ -14,7 +14,7 @@ data class Info(
 
 data class AllCharacterResponse(
     val info: Info,
-    val result: List<Character>
+    val results: List<Character>
 )
 
 data class CharacterResponse(

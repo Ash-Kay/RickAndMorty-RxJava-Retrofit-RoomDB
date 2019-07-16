@@ -1,22 +1,22 @@
 package com.example.rickandmorty.repository
 
-import android.annotation.SuppressLint
 import android.app.Application
+import android.util.Log
 import com.example.rickandmorty.database.CharacterDao
 import com.example.rickandmorty.database.CharacterDatabase
 import com.example.rickandmorty.models.Character
 import com.example.rickandmorty.response.AllCharacterResponse
-import com.example.rickandmorty.service.Api
 import com.example.rickandmorty.service.RetrofitInstance
 import io.reactivex.Observable
 import io.reactivex.Single
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 
 class CharacterRepository (application: Application) {
 
     private var characterDao : CharacterDao
     //private var allCharacter : List<Character>
-    //private var allCharacter : Single<List<Character>>
+    //private var allCharacter : List<Character>
 
     init {
         val database : CharacterDatabase? = CharacterDatabase.getInstance(application)
@@ -39,20 +39,38 @@ class CharacterRepository (application: Application) {
     }*/
 
     fun getCharacterFromDb(): Observable<List<Character>>{
-        return Observable.fromArray(characterDao.getAll())
+
+        return characterDao.getAll().toObservable()
+
+
+        /*characterDao.getAll().
+            subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+                Observable.fromArray(it)
+                    .filter{ it.isNotEmpty() }
+                    .doOnNext {
+                        print("Getting  ${it.size} user form DB cache")
+                    }
+            },{
+                Log.d("ashish", "Error ${it.message}")
+            })*/
+
+        /*return Observable.fromArray(characterDao.getAll())
             .filter { it.isNotEmpty() }
             .doOnNext {
                 print("Getting  ${it.size} user form DB cache")
-            }
+            }*/
     }
 
     fun getCharacterFromApi(): Observable<List<Character>>{
-        return RetrofitInstance.api.getAllCharacter("0")
+        return RetrofitInstance.api.getAllCharacter(null)
             .flatMap {
-                Observable.fromArray(it.result)
+                Observable.fromArray(it.results)
             }
-            .onErrorReturn {
-                characterDao.getAll()
+            .doOnError {
+                getCharacterFromDb()
+                Log.d("ashish","network error fetch from db")
             }
             .doOnNext {
                 storeCharactersInDb(it)
@@ -60,15 +78,14 @@ class CharacterRepository (application: Application) {
 
     }
 
-    fun getCharacterFromApi2(): Observable<AllCharacterResponse>{
+    /*fun getCharacterFromApi2(): Observable<AllCharacterResponse>{
         return RetrofitInstance.api.getAllCharacter("0")
             .doOnNext {
                 print("Getting  ${it.result.size} user form Network")
             }
 
-    }
+    }*/
 
-    @SuppressLint("CheckResult")
     fun storeCharactersInDb(characters: List<Character>) {
         Observable.fromCallable { characterDao.insertAll(characters) }
             .subscribeOn(Schedulers.io())
