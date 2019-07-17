@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            xmlns:tools="http://schemas.android.com/tools" android:id="@+id/nav_graph"
+            app:startDestination="@id/fragment_character_list">
+
+    <fragment android:id="@+id/fragment_location_list"
+              android:name="com.example.rickandmorty.fragments.CharacterListFragment"
+              android:label="fragment_character_list" tools:layout="@layout/fragment_character_list"/>
+    <fragment android:id="@+id/fragment_location_list"
+              android:name="com.example.rickandmorty.fragments.LocationListFragment"
+              android:label="fragment_location_list" tools:layout="@layout/fragment_location_list"/>
+    <fragment android:id="@+id/fragment_episode_list"
+              android:name="com.example.rickandmorty.fragments.EpisodeListFragment"
+              android:label="fragment_episode_list" tools:layout="@layout/fragment_episode_list"/>
+</navigation>

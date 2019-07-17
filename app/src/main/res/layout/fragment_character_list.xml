@@ -12,7 +12,10 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" android:id="@+id/recycler_character_list"/>
+            app:layout_constraintEnd_toEndOf="parent"
+            android:id="@+id/recycler_character_list"
+            tools:listitem="@layout/item_character"
+    />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

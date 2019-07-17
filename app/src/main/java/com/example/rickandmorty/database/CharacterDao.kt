@@ -3,7 +3,6 @@ package com.example.rickandmorty.database
 import androidx.room.*
 import com.example.rickandmorty.models.Character
 import io.reactivex.Flowable
-import io.reactivex.Observable
 import io.reactivex.Single
 
 @Dao

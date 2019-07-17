@@ -5,14 +5,14 @@ import android.util.Log
 import com.example.rickandmorty.database.CharacterDao
 import com.example.rickandmorty.database.CharacterDatabase
 import com.example.rickandmorty.models.Character
-import com.example.rickandmorty.response.AllCharacterResponse
 import com.example.rickandmorty.service.RetrofitInstance
 import io.reactivex.Observable
-import io.reactivex.Single
-import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 
-class CharacterRepository (application: Application) {
+class CharacterRepository (application: Application, val pageNo : Int) {
+
+    private val disposable = CompositeDisposable()
 
     private var characterDao : CharacterDao
     //private var allCharacter : List<Character>
@@ -28,75 +28,60 @@ class CharacterRepository (application: Application) {
         return Observable.concatArray(
             getCharacterFromDb(),
             getCharacterFromApi())
-    }
-
-    /*fun getCharacterFromDb(): Observable<List<Character>>{
-        return characterDao.getAll().filter { it.isNotEmpty() }
-            .toObservable()
-            .doOnNext {
-                print("Getting  ${it.size} user form DB cache")
+            .doOnError {
+                Log.d("ashish","Error in concat")
             }
-    }*/
+            .doOnNext {
+                Log.d("ashish","Concat successful")
+            }
+    }
 
     fun getCharacterFromDb(): Observable<List<Character>>{
 
-        return characterDao.getAll().toObservable()
-
-
-        /*characterDao.getAll().
-            subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({
-                Observable.fromArray(it)
-                    .filter{ it.isNotEmpty() }
-                    .doOnNext {
-                        print("Getting  ${it.size} user form DB cache")
-                    }
-            },{
-                Log.d("ashish", "Error ${it.message}")
-            })*/
-
-        /*return Observable.fromArray(characterDao.getAll())
-            .filter { it.isNotEmpty() }
+        return characterDao.getAll().filter { it.isNotEmpty() }
+            .doOnError {
+                Log.d("ashish","Error fetch DB.. $it")
+            }
+            .toObservable()
             .doOnNext {
-                print("Getting  ${it.size} user form DB cache")
-            }*/
+                Log.d("ashish","Dispatching ${it.size} users from DB...")
+            }
+
     }
 
     fun getCharacterFromApi(): Observable<List<Character>>{
-        return RetrofitInstance.api.getAllCharacter(null)
+        return RetrofitInstance.api.getAllCharacter(pageNo.toString())
             .flatMap {
                 Observable.fromArray(it.results)
             }
             .doOnError {
-                getCharacterFromDb()
+                //getCharacterFromDb()// no need i guess
                 Log.d("ashish","network error fetch from db")
             }
             .doOnNext {
+                Log.d("ashish","${it.size} items fetched from api and stored in db")
                 storeCharactersInDb(it)
             }
 
     }
 
-    /*fun getCharacterFromApi2(): Observable<AllCharacterResponse>{
-        return RetrofitInstance.api.getAllCharacter("0")
-            .doOnNext {
-                print("Getting  ${it.result.size} user form Network")
-            }
-
-    }*/
-
     fun storeCharactersInDb(characters: List<Character>) {
-        Observable.fromCallable { characterDao.insertAll(characters) }
-            .subscribeOn(Schedulers.io())
-            .observeOn(Schedulers.io())
-            .subscribe {
-                print("Inserted ${characters.size} users from API in DB...")
-            }
+        disposable.add(
+            Observable.fromCallable { characterDao.insertAll(characters) }
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .doOnComplete {
+                    print("Inserted ${characters.size} users from API in DB...")
+                }
+                .subscribe {
+                    print("Inserted ${characters.size} users from API in DB...")
+                }
+        )
+
     }
 
-
-
-
+    fun clearDisposable(){
+        disposable.clear()
+    }
 
 }
