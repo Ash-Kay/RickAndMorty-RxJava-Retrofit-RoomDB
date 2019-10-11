@@ -5,6 +5,4 @@
 * Retrofit
 * Caching
 
-<a href="#"><img src="https://i.imgur.com/YwMD9Yk.mp4"></a>
-
-<br/>
+![ScreenShot](https://media.giphy.com/media/Tg6iL2djhnoZE5b2DV/giphy.gif)
